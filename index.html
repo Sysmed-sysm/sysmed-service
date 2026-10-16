@@ -7,7 +7,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2563eb">
 
-  <!-- Full-Screen App Meta Tags -->
+  <!-- iOS Full-Screen App Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Sysmed Service">
@@ -32,7 +32,7 @@
       border: 0;
       display: block;
     }
-    /* Loading screen */
+    /* Loading screen for iOS redirect */
     #loadingScreen {
       display: flex;
       flex-direction: column;
@@ -42,9 +42,8 @@
       color: #667085;
       font-size: 16px;
       font-weight: 600;
-      background: #f4f6fb;
     }
-    /* Install Prompt Banner for Mobile/Desktop Browsers */
+    /* Install Prompt Banner for Android */
     #installBanner {
       position: fixed;
       left: 12px;
@@ -61,8 +60,6 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.28);
       z-index: 9999;
       font-size: 14px;
-      max-width: 450px;
-      margin: 0 auto;
     }
     #installBanner.show { display: flex; }
     .install-info { line-height: 1.35; }
@@ -96,14 +93,14 @@
     <div id="loadingScreen">Loading Sysmed Service…</div>
   </div>
 
-  <!-- Smart Install Banner -->
+  <!-- Smart Install Banner (Android) -->
   <div id="installBanner">
     <div class="install-info">
       <strong>Install Sysmed Service</strong>
-      <span>Pin to your desktop or phone for fast access</span>
+      <span>Add to your phone for fast full-screen access</span>
     </div>
     <div class="install-actions">
-      <button id="installBtn" class="btn-install">Install App</button>
+      <button id="installBtn" class="btn-install">Install</button>
       <button id="dismissBtn" class="btn-dismiss" aria-label="Close">✕</button>
     </div>
   </div>
@@ -119,7 +116,7 @@
       // iPhone/iPad: Redirect directly so Safari handles cookies & sessions natively
       window.location.replace(TARGET_URL);
     } else {
-      // Android, Windows PC, Mac Desktop: Load smoothly inside full-screen iframe wrapper
+      // Android & Desktop: Load smoothly inside full-screen iframe wrapper
       container.innerHTML = `
         <iframe
           id="portalFrame"
