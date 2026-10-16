@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Sysmed Service</title>
+
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2563eb">
 
@@ -12,11 +14,16 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Sysmed Service">
   <meta name="mobile-web-app-capable" content="yes">
+
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="icon.svg">
 
   <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -24,15 +31,17 @@
       height: 100%;
       overflow: hidden;
       background: #f4f6fb;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   Roboto, Arial, sans-serif;
     }
+
     .app-frame {
       width: 100%;
       height: 100%;
       border: 0;
       display: block;
     }
-    /* Loading screen for iOS redirect */
+
     #loadingScreen {
       display: flex;
       flex-direction: column;
@@ -43,7 +52,7 @@
       font-size: 16px;
       font-weight: 600;
     }
-    /* Install Prompt Banner for Android */
+
     #installBanner {
       position: fixed;
       left: 12px;
@@ -57,15 +66,36 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.28);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
       z-index: 9999;
       font-size: 14px;
     }
-    #installBanner.show { display: flex; }
-    .install-info { line-height: 1.35; }
-    .install-info strong { display: block; font-size: 15px; }
-    .install-info span { color: #d0d5dd; font-size: 12px; }
-    .install-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    #installBanner.show {
+      display: flex;
+    }
+
+    .install-info {
+      line-height: 1.35;
+    }
+
+    .install-info strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .install-info span {
+      color: #d0d5dd;
+      font-size: 12px;
+    }
+
+    .install-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
     .btn-install {
       background: #2563eb;
       color: #fff;
@@ -76,6 +106,7 @@
       font-size: 13px;
       cursor: pointer;
     }
+
     .btn-dismiss {
       background: transparent;
       color: #98a2b3;
@@ -86,19 +117,20 @@
     }
   </style>
 </head>
+
 <body>
 
-  <!-- Container (Switches dynamically based on device) -->
   <div id="appContainer" style="width:100%; height:100%;">
     <div id="loadingScreen">Loading Sysmed Service…</div>
   </div>
 
-  <!-- Smart Install Banner (Android) -->
+  <!-- Android Install Banner -->
   <div id="installBanner">
     <div class="install-info">
       <strong>Install Sysmed Service</strong>
       <span>Add to your phone for fast full-screen access</span>
     </div>
+
     <div class="install-actions">
       <button id="installBtn" class="btn-install">Install</button>
       <button id="dismissBtn" class="btn-dismiss" aria-label="Close">✕</button>
@@ -106,17 +138,26 @@
   </div>
 
   <script>
-    const TARGET_URL = "https://script.google.com/macros/s/AKfycbzwd8nenOgJOzocV734wNnGY2VmLHWdNvZ6oiW3ZE7Kk7XHMPNzJttJOOs7Rjb50baG/exec?view=engineer";
-    const container = document.getElementById('appContainer');
-    
-    // Detect iOS (iPhone, iPad, iPod)
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const TARGET_URL =
+      "https://script.google.com/macros/s/AKfycbzwd8nenOgJOzocV734wNnGY2VmLHWdNvZ6oiW3ZE7Kk7XHMPNzJttJOOs7Rjb50baG/exec?view=engineer";
 
-    if (isIOS) {
-      // iPhone/iPad: Redirect directly so Safari handles cookies & sessions natively
+    const container = document.getElementById("appContainer");
+
+    // Detect iOS devices.
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+      !window.MSStream;
+
+    // Detect mobile devices.
+    const isMobileDevice =
+      /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+    if (isIOS || !isMobileDevice) {
+      // iPhone/iPad and desktop: open the portal directly.
+      // This avoids embedding the Apps Script portal in a desktop iframe.
       window.location.replace(TARGET_URL);
     } else {
-      // Android & Desktop: Load smoothly inside full-screen iframe wrapper
+      // Android: preserve the existing iframe wrapper.
       container.innerHTML = `
         <iframe
           id="portalFrame"
@@ -127,37 +168,47 @@
         </iframe>`;
     }
 
-    // Register Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(() => {});
+    // Register the existing service worker.
+    // No offline caching is added.
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
       });
     }
 
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    const banner = document.getElementById('installBanner');
-    const installBtn = document.getElementById('installBtn');
-    const dismissBtn = document.getElementById('dismissBtn');
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+
+    const banner = document.getElementById("installBanner");
+    const installBtn = document.getElementById("installBtn");
+    const dismissBtn = document.getElementById("dismissBtn");
+
     let deferredPrompt = null;
 
-    window.addEventListener('beforeinstallprompt', (e) => {
+    window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
+
       if (isStandalone) return;
+
       deferredPrompt = e;
-      banner.classList.add('show');
+      banner.classList.add("show");
     });
 
-    installBtn.addEventListener('click', async () => {
+    installBtn.addEventListener("click", async () => {
       if (!deferredPrompt) return;
+
       deferredPrompt.prompt();
       await deferredPrompt.userChoice;
+
       deferredPrompt = null;
-      banner.classList.remove('show');
+      banner.classList.remove("show");
     });
 
-    dismissBtn.addEventListener('click', () => {
-      banner.classList.remove('show');
+    dismissBtn.addEventListener("click", () => {
+      banner.classList.remove("show");
     });
   </script>
+
 </body>
 </html>
